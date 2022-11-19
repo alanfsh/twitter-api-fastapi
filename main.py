@@ -198,8 +198,41 @@ def home():
     summary="Post a tweet",
     tags=["Tweets"]
     )
-def post():
-    pass
+def post(tweet: Tweet = Body(...)):
+    """
+    Post a tweet
+
+    This path operation post a tweet in the app
+
+    Parameters:
+        - Request Body Parameter
+            - tweet: Tweet
+
+    Returns a json with the basic tweet information:
+    tweet_id: UUID
+    content: str
+    created_at: datetime
+    updated_at: Optional[datetime]
+    by: User
+    """
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        # Convert a json to dict
+        results = json.loads(f.read())
+        tweet_dict = tweet.dict()
+        tweet_dict["tweet_id"] = str(tweet_dict["tweet_id"])
+        tweet_dict["created_at"] = str(tweet_dict["created_at"])
+        if tweet_dict["updated_at"]:
+            tweet_dict["updated_at"] = str(tweet_dict["updated_at"])
+        tweet_dict["by"]["user_id"] = str(tweet_dict["by"]["user_id"])
+        tweet_dict["by"]["user_id"] = str(tweet_dict["by"]["user_id"])
+        tweet_dict["by"]["birth_date"] = str(tweet_dict["by"]["birth_date"])
+        
+        results.append(tweet_dict)
+        # Move cursor in f to the start
+        f.seek(0)
+        # Convert a dict to json
+        f.write(json.dumps(results))
+        return tweet    
 
 ### Show a tweet
 @app.get(
