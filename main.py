@@ -226,8 +226,6 @@ def delete_a_user(user_id: UUID = Path(...)):
         f.write(json.dumps(all_users))
         return deleted_user
 
-
-
 ### Update a user
 @app.put(
     path="/users/{user_id}/update",
@@ -236,8 +234,49 @@ def delete_a_user(user_id: UUID = Path(...)):
     summary="Update a user",
     tags=["Users"]
     )
-def update_a_user():
-    pass
+def update_a_user(user_id: UUID = Path(...), user_to_update: User = Body(...)):
+    """
+    Update a user
+
+    This path operation update a user information in the app
+
+    Parameters:
+        - Path parameters:
+            - user_id
+        - Request Body Parameter
+            - user_updated: User
+
+
+    Returns a json with the user information updated, with the following keys:
+        - user_id: UUID
+        - email: EmailStr
+        - first_name: str
+        - last_name: str
+        - birth_date: str
+    """
+    with open("users.json", "r+", encoding="utf-8") as f:
+        user_updated = None
+        all_users = json.loads(f.read())
+        for user in all_users:
+            if user["user_id"] == str(user_id):
+                user["user_id"] = str(user_to_update.user_id)
+                user["first_name"] = user_to_update.first_name
+                user["last_name"] = user_to_update.last_name
+                user["birth_date"] = str(user_to_update.birth_date)
+                user["email"] = user_to_update.email
+                user_updated = user
+                break
+        
+        if not user_updated:
+            raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The user doesn't exist!"
+            ) 
+
+        f.seek(0)
+        f.truncate()
+        f.write(json.dumps(all_users))
+        return user_updated
 
 ## Tweets
 
