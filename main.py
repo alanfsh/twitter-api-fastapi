@@ -11,13 +11,11 @@ from pydantic import BaseModel
 from pydantic import EmailStr
 from pydantic import Field
 
-
 # FastAPI
 from fastapi import FastAPI
 from fastapi import status
 from fastapi import Body, Path
 from fastapi import HTTPException
-
 
 app = FastAPI()
 
@@ -341,9 +339,9 @@ def update_a_user(user_id: UUID = Path(...), user_to_update: UserUpdate = Body(.
     )
 def home():
     """
-    Show all users
+    Show all tweets
 
-    This path operation shows all  tweets in the app
+    This path operation shows all tweets in the app
 
     Parameters:
         -
