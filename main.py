@@ -426,8 +426,42 @@ def show_a_tweet(tweet_id: UUID = Path(...)):
     summary="Delete a tweet",
     tags=["Tweets"]
     )
-def delete_a_tweet():
-    pass
+def delete_a_tweet(tweet_id: UUID = Path(...)):
+    """
+    Delete a tweet
+
+    This path operation delete a tweet in the app
+
+    Parameters:
+        - Path parameters:
+            - tweet_id
+
+    Returns a json with a tweet deleted information in the app, with the following keys:
+        - tweet_id: UUID
+        - content: str
+        - created_at: datetime
+        - updated_at: Optional[datetime]
+        - by: User
+    """
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        deleted_tweet = None
+        all_tweets = json.loads(f.read())
+        for tweet in all_tweets:
+            if tweet["tweet_id"] == str(tweet_id):
+                deleted_tweet = tweet
+                break
+        
+        if not deleted_tweet:
+            raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The tweet doesn't exist!"
+            ) 
+
+        all_tweets.remove(deleted_tweet)
+        f.seek(0)
+        f.truncate()
+        f.write(json.dumps(all_tweets))
+        return deleted_tweet
 
 ### Update a tweet
 @app.put(
