@@ -60,9 +60,17 @@ class Tweet(BaseModel):
         min_length=1,
         max_length=256
     )
-    created_at: datetime = Field(default=datetime.now( ))
+    created_at: datetime = Field(default=datetime.now())
     updated_at: Optional[datetime] = Field(default=None)
     by: User = Field(...)
+
+class TweetUpdate(BaseModel):
+    content: str = Field(
+        ...,
+        min_length=1,
+        max_length=256
+    )
+    updated_at: datetime = Field(default=datetime.now())
 
 # Path Operations
 
@@ -471,5 +479,40 @@ def delete_a_tweet(tweet_id: UUID = Path(...)):
     summary="Update a tweet",
     tags=["Tweets"]
     )
-def update_a_tweet():
-    pass
+def update_a_tweet(tweet_id: UUID = Path(...), tweet_to_update: TweetUpdate = Body(...)):
+    """
+    Update a tweet
+
+    This path operation update a tweet in the app
+
+    Parameters:
+        - Path parameters:
+            - tweet_id
+
+    Returns a json with the updated tweet in the app, with the following keys:
+        - tweet_id: UUID
+        - content: str
+        - created_at: datetime
+        - updated_at: Optional[datetime]
+        - by: User
+    """
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        updated_tweet = None
+        all_tweets = json.loads(f.read())
+        for tweet in all_tweets:
+            if tweet["tweet_id"] == str(tweet_id):
+                tweet["content"] = str(tweet_to_update.content)
+                tweet["updated_at"] = str(tweet_to_update.updated_at)
+                updated_tweet = tweet
+                break
+        
+        if not updated_tweet:
+            raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The tweet doesn't exist!"
+            ) 
+
+        f.seek(0)
+        f.truncate()
+        f.write(json.dumps(all_tweets))
+        return updated_tweet
