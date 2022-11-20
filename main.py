@@ -114,8 +114,38 @@ def signup(user: UserRegister = Body(...)):
     summary="Login a user",
     tags=["Users"]
     )
-def login():
-    pass
+def login(email: EmailStr = Body(...), password: str = Body(...)):
+    """
+    Login
+
+    This path operation login a user in the app
+
+    Parameters:
+        - Request Body Parameter
+            - email: EmailStr
+            - password: str
+
+    Returns a json with the basic user information:
+        - user_id: UUID
+        - email: EmailStr
+        - first_name: str
+        - last_name: str
+        - birth_date: str
+    """
+    with open("users.json", "r+", encoding="utf-8") as f:
+        user_logged_in = None
+        all_users = json.loads(f.read())
+        for user in all_users:
+            if user["email"] == email and user["password"] == password:
+                user_logged_in = user
+                break      
+        if not user_logged_in:
+            raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The user or password doesn't exist!"
+            ) 
+        return user_logged_in
+
 
 ### Show all users
 @app.get(
