@@ -53,6 +53,20 @@ class UserRegister(User):
         max_length=64
     )
 
+class UserUpdate(BaseModel):
+    first_name: str = Field(
+        ...,
+        min_length= 1,
+        max_length=50
+    )
+    last_name: str = Field(
+        ...,
+        min_length= 1,
+        max_length=50
+    )
+    birth_date: Optional[date] = Field(default=None)
+    email: EmailStr = Field(...)
+
 class Tweet(BaseModel):
     tweet_id: UUID = Field(...)
     content: str = Field(
@@ -271,7 +285,7 @@ def delete_a_user(user_id: UUID = Path(...)):
     summary="Update a user",
     tags=["Users"]
     )
-def update_a_user(user_id: UUID = Path(...), user_to_update: User = Body(...)):
+def update_a_user(user_id: UUID = Path(...), user_to_update: UserUpdate = Body(...)):
     """
     Update a user
 
@@ -281,7 +295,7 @@ def update_a_user(user_id: UUID = Path(...), user_to_update: User = Body(...)):
         - Path parameters:
             - user_id
         - Request Body Parameter
-            - user_updated: User
+            - user_to_update: UserUpdate
 
 
     Returns a json with the user information updated, with the following keys:
@@ -296,7 +310,7 @@ def update_a_user(user_id: UUID = Path(...), user_to_update: User = Body(...)):
         all_users = json.loads(f.read())
         for user in all_users:
             if user["user_id"] == str(user_id):
-                user["user_id"] = str(user_to_update.user_id)
+#                user["user_id"] = str(user_to_update.user_id)
                 user["first_name"] = user_to_update.first_name
                 user["last_name"] = user_to_update.last_name
                 user["birth_date"] = str(user_to_update.birth_date)
