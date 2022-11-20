@@ -146,7 +146,6 @@ def login(email: EmailStr = Body(...), password: str = Body(...)):
             ) 
         return user_logged_in
 
-
 ### Show all users
 @app.get(
     path="/users",
@@ -390,8 +389,34 @@ def post(tweet: Tweet = Body(...)):
     summary="Show a tweet",
     tags=["Tweets"]
     )
-def show_a_tweet():
-    pass
+def show_a_tweet(tweet_id: UUID = Path(...)):
+    """
+    Show a tweet
+
+    This path operation shows a tweet in the app
+
+    Parameters:
+        - Path parameters:
+            - tweet_id
+
+    Returns a json with a user information in the app, with the following keys:
+        - tweet_id: UUID
+        - content: str
+        - created_at: datetime
+        - updated_at: Optional[datetime]
+        - by: User
+    """
+    with open("tweets.json", "r", encoding="utf-8") as f:
+        all_tweets = json.loads(f.read())
+        for tweet in all_tweets:
+            if tweet["tweet_id"] == str(tweet_id):
+                return tweet
+    
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="The tweet doesn't exist!"
+        )
+
 
 ### Delete a tweet
 @app.delete(
